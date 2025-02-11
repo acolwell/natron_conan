@@ -2,7 +2,13 @@ name: Build Clang & LLVM Cache
 
 on:
   workflow_dispatch: {}
-  #push: {}
+  push:
+    paths:
+      - 'scripts/getBuildConanCachesPackageInfo.py'
+      - '.github/workflows/build_clang.yml'
+      - 'conan.lock'
+      - 'modules/conan-center-index'
+
   #pull_request: {}
 
   schedule:
