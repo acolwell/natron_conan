@@ -64,7 +64,7 @@ jobs:
 
       - name: Build Natron
         run: |
-          conan install -pr:a ${{ matrix.os.conan_profile }} --requires 'natron/conan_build' --update 'natron/conan_build' --build missing --lockfile-partial
+          conan install -pr:a ${{ matrix.os.conan_profile }} --requires 'natron/conan_build' --update 'natron/conan_build' --build 'natron/conan_build' --build missing --lockfile-partial
 
           # Remove unnecessary files
           conan cache clean '*'
