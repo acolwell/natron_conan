@@ -48,6 +48,13 @@ jobs:
           conan_profile: ${{ matrix.os.conan_profile }}
           restore_cache_filename: ${{ format('conan_cache_save-{0}.tgz', matrix.os.conan_profile) }}
 
+      - name: Remove old recipes
+        run: |
+          conan remove -c "openfx-misc/*"
+          conan remove -c "openfx-io/*"
+          conan remove -c "natron/*"
+          conan remove -c "natron_installer/*"
+
       - name: Build openfx-misc
         run: |
           conan install -pr:a ${{ matrix.os.conan_profile }} --requires 'openfx-misc/master' --update 'openfx-misc/master' --build 'openfx-misc/master' --build missing --lockfile-partial

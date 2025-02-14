@@ -38,12 +38,6 @@ class Shiboken2Conanfile(ConanFile):
         }
 
 
-    def build_requirements(self):
-        #self.tool_requires(f"qt/{self.version}")
-        #self.tool_requires("clang/<host_version>")
-        #self.tool_requires("cpython/<host_version>")
-        pass
-
     def requirements(self):
         self.requires(f"qt/{self.version}", run=True)
         self.requires("libxml2/2.13.4")

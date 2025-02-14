@@ -98,10 +98,10 @@ index 48dd73e..dbb435b 100644
      enable_language(RC)
      add_compile_definitions(WINDOWS WIN32 _UNICODE UNICODE NOMINMAX QHTTP_SERVER_STATIC)
 diff --git a/Engine/CMakeLists.txt b/Engine/CMakeLists.txt
-index 576f7b2..7b0ff3a 100644
+index 576f7b2..f6bd5d4 100644
 --- a/Engine/CMakeLists.txt
 +++ b/Engine/CMakeLists.txt
-@@ -17,16 +17,15 @@
+@@ -17,19 +17,22 @@
  # along with Natron.  If not, see <http://www.gnu.org/licenses/gpl-2.0.html>
  # ***** END LICENSE BLOCK *****
  
@@ -121,12 +121,19 @@ index 576f7b2..7b0ff3a 100644
  list(TRANSFORM PYENGINE_INCLUDE_DIRS PREPEND "-I" OUTPUT_VARIABLE PYENGINE_INCS)
  set(PYENGINE_HEADER PySide${PYSIDE_VERSION_MAJOR}_Engine_Python.h)
  
-@@ -42,15 +41,17 @@ execute_process(COMMAND ${Python3_EXECUTABLE} ../tools/utils/sourceList.py types
++if(APPLE)
++    list(APPEND PYENGINE_INCS "-isystem/Library/Developer/CommandLineTools/usr/include/c++/v1" "-isystem/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include" "-isystem/Library/Developer/CommandLineTools/usr/include")
++endif()
++
+ set(shiboken_args
+     "-std=c++17" "--enable-parent-ctor-heuristic" "--use-isnull-as-nb_nonzero"
+     "--avoid-protected-hack" "--enable-pyside-extensions"
+@@ -42,15 +45,17 @@ execute_process(COMMAND ${Python3_EXECUTABLE} ../tools/utils/sourceList.py types
      OUTPUT_VARIABLE PyEngine_SOURCES)
  set_property(SOURCE ${PyEngine_SOURCES} PROPERTY SKIP_AUTOGEN ON)
  add_custom_command(OUTPUT ${PyEngine_SOURCES}
 -    COMMAND $<TARGET_FILE:${SHIBOKEN_EXE}> ${shiboken_args}
-+    COMMAND $<TARGET_FILE:${SHIBOKEN_EXE}> ${shiboken_args} "-I$<JOIN:${QTCORE_INCLUDE_DIRS},;-I>"
++    COMMAND env "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}" $<TARGET_FILE:${SHIBOKEN_EXE}> ${shiboken_args} "-I$<JOIN:${QTCORE_INCLUDE_DIRS},;-I>"
 +    COMMAND_EXPAND_LISTS
 +    VERBATIM
      COMMAND ${Python3_EXECUTABLE} ../tools/utils/sourceCleanup.py typesystem_engine.xml ${PYENGINE_OUT}
@@ -142,7 +149,7 @@ index 576f7b2..7b0ff3a 100644
          set(XDG_DEFS __NATRON_WAYLAND__)
      endif()
  endif()
-@@ -72,13 +73,13 @@ target_link_libraries(NatronEngine
+@@ -72,13 +77,13 @@ target_link_libraries(NatronEngine
          HostSupport
          Boost::headers
          Boost::serialization
@@ -160,7 +167,7 @@ index 576f7b2..7b0ff3a 100644
          Python3::Module
          ${XDG_LIBS}
          ceres
-@@ -93,6 +94,10 @@ if(WIN32)
+@@ -93,6 +98,10 @@ if(WIN32)
      target_link_libraries(NatronEngine PRIVATE mpr)
  endif()
  
