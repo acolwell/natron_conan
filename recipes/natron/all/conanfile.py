@@ -1,8 +1,9 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.env import Environment
 from conan.tools.scm import Git
-from conan.tools.files import apply_conandata_patches, export_conandata_patches
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches
 
 import os
 import shutil
@@ -29,9 +30,6 @@ class natronRecipe(ConanFile):
         "qt/*:qtdoc": False,
         "qt/*:essential_modules": False,
     }
-
-    def build_requirements(self):
-        self.tool_requires("shiboken2/<host_version>")
 
     def requirements(self):
         qt_version = "5.15.16"
@@ -73,9 +71,9 @@ class natronRecipe(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        tc.preprocessor_definitions["NATRON_RUN_WITHOUT_PYTHON"] = 1
         tc.cache_variables["BUILD_USER_NAME"] = ""
         tc.cache_variables["NATRON_SYSTEM_LIBS"] = "ON"
+        tc.cache_variables["PYSIDE_TYPESYSTEMS"] = os.path.join(self.dependencies['pyside2'].package_folder,"share","PySide2","typesystems")
         tc.generate()
 
     def build(self):
@@ -95,7 +93,9 @@ class natronRecipe(ConanFile):
                     os.path.join(self.package_folder, "bin", "Natron.app", "Contents", "MacOS"))
 
     def package_info(self):
-        self.cpp_info.requires = ["qt::qt", "cpython::cpython", "expat::expat", "boost::boost", "cairo::cairo", "glog::glog", "ceres-solver::ceres-solver"]
+        self.cpp_info.requires = [
+            "qt::qt", "cpython::cpython", "expat::expat", "boost::boost", "cairo::cairo",
+            "glog::glog", "ceres-solver::ceres-solver", "pyside2::libpyside2", "shiboken2::libshiboken2"]
 
         if self.settings.os == "Linux":
             self.cpp_info.requires += ["wayland::wayland"]

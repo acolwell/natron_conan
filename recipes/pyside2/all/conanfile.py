@@ -89,7 +89,9 @@ class Pyside2Conanfile(ConanFile):
         output = StringIO()
         cmd = f"{python_bin} -c 'import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])'"
         self.run(cmd, output)
-        suffix = output.getvalue()
+        suffix = output.getvalue().strip()
+        if self.settings.os == "Macos" and suffix.endswith(".so"):
+            suffix = suffix.replace(".so", ".dylib")
         return f"{prefix}{base_name}{suffix}"
 
     def package_info(self):

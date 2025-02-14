@@ -1,8 +1,8 @@
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, check_sha256, download, export_conandata_patches, unzip
+from conan.tools.files import apply_conandata_patches, check_sha256, copy, download, export_conandata_patches, unzip
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -71,13 +71,6 @@ class Shiboken2Conanfile(ConanFile):
         env.define_path("CLANG_INSTALL_DIR", self.dependencies["clang"].package_folder)
         env.vars(self).save_script("clang_env")
 
-        if self.settings.os == "Linux":
-            # On Linux we need to add python's libdirs to the library path so we can find libpython3.12.so.1.0
-            env = Environment()
-            for libdir in self.dependencies["cpython"].cpp_info.libdirs:
-                env.append_path("LD_LIBRARY_PATH", libdir)
-            env.vars(self).save_script("python_env")
-
         ms = VirtualBuildEnv(self)
         ms.generate()
         deps = CMakeDeps(self)
@@ -100,7 +93,10 @@ class Shiboken2Conanfile(ConanFile):
         output = StringIO()
         cmd = f"{python_bin} -c 'import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])'"
         self.run(cmd, output)
-        suffix = output.getvalue()
+        suffix = output.getvalue().strip()
+        if self.settings.os == "Macos" and suffix.endswith(".so"):
+            suffix = suffix.replace(".so", ".dylib")
+
         return f"{prefix}{base_name}{suffix}"
 
     def package_info(self):
@@ -114,20 +110,19 @@ class Shiboken2Conanfile(ConanFile):
         self.cpp_info.components["libshiboken2"].includedirs = ["include/shiboken2"]
         self.cpp_info.components["libshiboken2"].requires = ["clang::clang", "qt::qtCore", "libxml2::libxml2", "libxslt::libxslt"]
 
-        self.cpp_info.components["shiboken2"].bins = ["shiboken2"]
-        self.cpp_info.components["shiboken2"].requires = ["clang::clang", "qt::qtCore"]
-
         if (self.dependencies['clang'].package_folder):
             self.buildenv_info.define_path("CLANG_INSTALL_DIR", self.dependencies["clang"].package_folder)
             self.runenv_info.define_path("CLANG_INSTALL_DIR", self.dependencies["clang"].package_folder)
 
-        if self.settings.os == "Linux":
-            # On Linux we need to add clang libdirs to the library path so we can find libclang
-            for libdir in self.dependencies["clang"].cpp_info.libdirs:
-                self.buildenv_info.append_path("LD_LIBRARY_PATH", libdir)
-                self.runenv_info.append_path("LD_LIBRARY_PATH", libdir)
-
-
     def package(self):
         cmake = CMake(self)
         cmake.install()
+
+        for suffix in ["dll", "so","dylib"]:
+            dest_dir = "bin" if self.settings.os == "Windows" else "lib"
+            copy(self, f"*Qt5Core*.{suffix}", self.dependencies['qt'].cpp_info.libdirs[0], os.path.join(self.package_folder, dest_dir))
+            copy(self, f"libclang.{suffix}", self.dependencies['clang'].cpp_info.libdirs[0], os.path.join(self.package_folder, dest_dir))
+
+        if self.settings.os == "Macos":
+            fix_apple_shared_install_name(self)
+
