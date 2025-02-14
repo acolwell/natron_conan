@@ -38,12 +38,6 @@ class Pyside2Conanfile(ConanFile):
         }
 
 
-    def build_requirements(self):
-        #self.tool_requires(f"qt/{self.version}")
-        #self.tool_requires("cpython/<host_version>")
-        #self.tool_requires("shiboken2/<host_version>")
-        pass
-
     def requirements(self):
         self.requires(f"qt/{self.version}")
         self.requires(f"shiboken2/{self.version}")

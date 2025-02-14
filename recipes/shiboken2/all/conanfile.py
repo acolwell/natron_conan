@@ -45,10 +45,10 @@ class Shiboken2Conanfile(ConanFile):
         pass
 
     def requirements(self):
-        self.requires(f"qt/{self.version}")
+        self.requires(f"qt/{self.version}", run=True)
         self.requires("libxml2/2.13.4")
         self.requires("libxslt/1.1.42")
-        self.requires("clang/18.1.0")
+        self.requires("clang/18.1.0", run=True)
         self.requires("cpython/3.10.14")
 
     def export_sources(self):
@@ -106,7 +106,12 @@ class Shiboken2Conanfile(ConanFile):
         self.runenv_info.append_path("PATH", bindir)
         self.buildenv_info.append_path("PATH", bindir)
 
+        #libdir = os.path.join(self.package_folder, "lib")
+        #self.runenv_info.append_path("LD_LIBRARY_PATH", libdir)
+        #self.buildenv_info.append_path("LD_LIBRARY_PATH", libdir)
+
         self.cpp_info.components["libshiboken2"].libs = [self._get_lib_name("shiboken2")]
+        self.cpp_info.components["libshiboken2"].libdirs = ["lib"]
         self.cpp_info.components["libshiboken2"].includedirs = ["include/shiboken2"]
         self.cpp_info.components["libshiboken2"].requires = ["clang::clang", "qt::qtCore", "libxml2::libxml2", "libxslt::libxslt"]
 
@@ -117,12 +122,3 @@ class Shiboken2Conanfile(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-
-        for suffix in ["dll", "so","dylib"]:
-            dest_dir = "bin" if self.settings.os == "Windows" else "lib"
-            copy(self, f"*Qt5Core*.{suffix}", self.dependencies['qt'].cpp_info.libdirs[0], os.path.join(self.package_folder, dest_dir))
-            copy(self, f"libclang.{suffix}", self.dependencies['clang'].cpp_info.libdirs[0], os.path.join(self.package_folder, dest_dir))
-
-        if self.settings.os == "Macos":
-            fix_apple_shared_install_name(self)
-

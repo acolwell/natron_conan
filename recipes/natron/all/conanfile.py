@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.env import Environment
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.scm import Git
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches
 
@@ -31,15 +31,18 @@ class natronRecipe(ConanFile):
         "qt/*:essential_modules": False,
     }
 
+    def build_requirements(self):
+        self.tool_requires(f"shiboken2/<host_version>")
+
     def requirements(self):
         qt_version = "5.15.16"
 
         self.requires("expat/2.6.2")
         self.requires("boost/1.84.0")
         self.requires("cairo/1.18.0")
-        self.requires(f"qt/{qt_version}")
-        self.requires(f"shiboken2/{qt_version}")
-        self.requires(f"pyside2/{qt_version}")
+        self.requires(f"qt/{qt_version}", run=True)
+        self.requires(f"shiboken2/{qt_version}", run=True)
+        self.requires(f"pyside2/{qt_version}", run=True)
         self.requires("glog/0.6.0")
         self.requires("ceres-solver/1.14.0")
         self.requires("cpython/3.10.14")
@@ -60,13 +63,8 @@ class natronRecipe(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
-
-        if self.settings.os == "Linux":
-            # On Linux we need to add python's libdirs to the library path so we can find libpython3.12.so.1.0
-            env = Environment()
-            for libdir in self.dependencies["cpython"].cpp_info.libdirs:
-                env.append_path("LD_LIBRARY_PATH", libdir)
-            env.vars(self).save_script("python_env")
+        vbe = VirtualBuildEnv(self)
+        vbe.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
