@@ -46,7 +46,8 @@ class ClangConanfile(ConanFile):
         cmake = CMake(self)
         cmake.configure(variables={"LLVM_EXTERNAL_LIT": os.path.join(self.dependencies["llvm"].package_folder,"utils","lit"),
                                    "LLVM_ROOT": self.dependencies["llvm"].package_folder,
-                                   "LLVM_INCLUDE_TESTS": "OFF"},
+                                   "LLVM_INCLUDE_TESTS": "OFF",
+                                   "LLVM_ENABLE_RUNTIMES": "all"},
                         build_script_folder="clang")
         cmake.build()
 

@@ -37,6 +37,8 @@ class Pyside2Conanfile(ConanFile):
         "qt/*:essential_modules": False,
         }
 
+    def build_requirements(self):
+        self.tool_requires("shiboken2/<host_version>")
 
     def requirements(self):
         self.requires(f"qt/{self.version}")
