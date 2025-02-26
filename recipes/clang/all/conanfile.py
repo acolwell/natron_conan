@@ -10,14 +10,11 @@ class ClangConanfile(ConanFile):
     name = "clang"
     version="18.1.8"
     description = "LLVM & Clang"
-    license = "<Your project license goes here>"
-    homepage = "<Your project homepage goes here>"
+    license = "Apache-2.0"
+    homepage = "https://clang.llvm.org/"
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
-
-    default_options = {
-        }
 
     def requirements(self):
         self.requires("zlib/1.3.1")
