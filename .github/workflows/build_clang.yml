@@ -9,6 +9,7 @@ on:
       - 'conan.lock'
       - 'modules/conan-center-index'
       - 'recipes/clang/all/conanfile.py'
+      - 'recipes/clang/config.yml'
 
   #pull_request: {}
 
