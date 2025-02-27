@@ -42,7 +42,9 @@ class ClangConanfile(ConanFile):
             "LLVM_INSTALL_UTILS": "ON",
             "LLVM_ENABLE_PROJECTS": "clang;clang-tools-extra",
             "LLVM_TARGETS_TO_BUILD": "host;AArch64;ARM;X86",
-            "LLVM_ENABLE_RUNTIMES": "all"}
+            "LLVM_ENABLE_RUNTIMES": "all",
+            "LLVM_ENABLE_EH": "ON",
+            "LLVM_ENABLE_RTTI": "ON" }
 
         if self.settings.os != "Windows":
             config_vars["LLVM_BUILD_LLVM_DYLIB"] = "ON"
