@@ -46,7 +46,9 @@ class ClangConanfile(ConanFile):
             "LLVM_ENABLE_EH": "ON",
             "LLVM_ENABLE_RTTI": "ON" }
 
-        if self.settings.os != "Windows":
+        if self.settings.os == "Windows":
+            config_vars["LIBUNWIND_ENABLE_SHARED"] = "OFF"
+        else:
             config_vars["LLVM_BUILD_LLVM_DYLIB"] = "ON"
             config_vars["LLVM_LINK_LLVM_DYLIB"] = "ON"
 
