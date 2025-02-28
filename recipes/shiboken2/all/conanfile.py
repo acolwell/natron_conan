@@ -100,6 +100,13 @@ class Shiboken2Conanfile(ConanFile):
         self.runenv_info.append_path("PATH", bindir)
         self.buildenv_info.append_path("PATH", bindir)
 
+        if self.settings.os == "Macos":
+            tmp_stringio = StringIO()
+            self.run("xcrun --show-sdk-path", stdout=tmp_stringio)
+            sdk_root_path = tmp_stringio.getvalue().strip()
+            self.buildenv_info.define_path("SDKROOT", sdk_root_path)
+            self.runenv_info.define_path("SDKROOT", sdk_root_path)
+
         #libdir = os.path.join(self.package_folder, "lib")
         #self.runenv_info.append_path("LD_LIBRARY_PATH", libdir)
         #self.buildenv_info.append_path("LD_LIBRARY_PATH", libdir)
