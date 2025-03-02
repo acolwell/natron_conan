@@ -48,7 +48,6 @@ jobs:
 
     name: Build ${{ matrix.packages.conan_profile }} - ${{ matrix.packages.name }}
     runs-on: ${{ matrix.packages.runs_on }}
-    continue-on-error: true
     needs: [get_packages_to_build]
 
     env:
