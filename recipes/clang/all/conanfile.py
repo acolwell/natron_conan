@@ -50,7 +50,7 @@ class ClangConanfile(ConanFile):
         else:
             config_vars["LLVM_BUILD_LLVM_DYLIB"] = "ON"
             config_vars["LLVM_LINK_LLVM_DYLIB"] = "ON"
-            config_vars["LLVM_ENABLE_RUNTIMES"] = "all",
+            config_vars["LLVM_ENABLE_RUNTIMES"] = "all"
 
         cmake.configure(variables=config_vars, build_script_folder="llvm")
         cmake.build()
